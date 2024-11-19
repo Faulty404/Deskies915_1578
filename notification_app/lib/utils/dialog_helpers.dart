@@ -6,16 +6,16 @@ Future<void> showProfileDialog(BuildContext context) async {
     builder: (BuildContext context) {
       return AlertDialog(
         title: const Text('User Profile'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 40,
               backgroundImage: NetworkImage('https://via.placeholder.com/150'),
             ),
-            const SizedBox(height: 16),
-            const Text('John Doe', style: TextStyle(fontSize: 18)),
-            const Text('john.doe@example.com'),
+            SizedBox(height: 16),
+            Text('John Doe', style: TextStyle(fontSize: 18)),
+            Text('john.doe@example.com'),
           ],
         ),
         actions: [

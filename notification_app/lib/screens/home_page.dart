@@ -3,6 +3,7 @@ import '../models/notification_item.dart';
 import '../widgets/notification_card.dart';
 import '../widgets/watch_tab_item.dart';
 import '../utils/dialog_helpers.dart';
+import './bluetooth_tab.dart'; // Import the BluetoothTab screen
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -21,17 +22,38 @@ class _MyHomePageState extends State<MyHomePage> {
     NotificationItem("Check your app settings.", Icons.settings, "settings"),
   ];
 
+  // Method to handle bottom navigation item taps
   void _onBottomNavItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
+  // Method to delete a notification
   void _deleteNotification(int index) {
-    setState(() {
-      notifications.removeAt(index);
-    });
-  }
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Delete Notification'),
+      content: const Text('Are you sure you want to delete this notification?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context), // Dismiss dialog
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            setState(() {
+              notifications.removeAt(index);
+            });
+            Navigator.pop(context); // Dismiss dialog
+          },
+          child: const Text('Delete'),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +69,11 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: IndexedStack(
         index: _selectedIndex,
-        children: [_notificationsTab(), _watchTab()],
+        children: [
+          _notificationsTab(),
+          _watchTab(),
+          const BluetoothTab(), // Add the BluetoothTab screen here
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
@@ -61,6 +87,10 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: Icon(Icons.watch),
             label: 'Watch',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bluetooth),
+            label: 'Bluetooth',
+          ),
         ],
       ),
     );
@@ -71,6 +101,8 @@ class _MyHomePageState extends State<MyHomePage> {
     switch (index) {
       case 1:
         return "Watch";
+      case 2:
+        return "Bluetooth";
       default:
         return "Notifications";
     }

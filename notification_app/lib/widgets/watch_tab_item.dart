@@ -6,11 +6,11 @@ class WatchTabItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const WatchTabItem({
-    Key? key,
+    super.key,
     required this.icon,
     required this.label,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class WatchTabItem extends StatelessWidget {
             const SizedBox(height: 8.0),
             Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18.0,
                 fontWeight: FontWeight.bold,
                 color: Colors.deepPurple,

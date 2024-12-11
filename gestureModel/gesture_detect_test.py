@@ -44,6 +44,10 @@ while True:
             print("One Hand", len(detection_result.hand_landmarks[0]), end="\n\n")
         else:
             print("Two Hands", len(detection_result.hand_landmarks[0]), len(detection_result.hand_landmarks[1]), end="\n\n")
+
+        print(detection_result)
+        # debugging
+        print(type(detection_result))
         iterations += 1
 
     annotated_image = draw_landmarks_on_image(mp_image.numpy_view(), detection_result)

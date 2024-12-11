@@ -15,5 +15,7 @@ class GestureToWord:
 
         number_nodes = sum(nodes_per_layer)
         self.model = tfkeras.models.Sequential(
-            tfkeras.layers.Dense(nodes_per_layer)
+            tfkeras.layers.Dense(nodes_per_layer[0], activation = activations[0], input_shape = ())
         )
+        for i in range(1, len(num_layers)):
+            self.model.add(tf.Dense())

@@ -38,7 +38,7 @@ while True:
     detection_result = detector.detect(mp_image)
     if iterations >= 0:
         if len(detection_result.hand_landmarks) == 0:
-            print("No Hands")
+            # print("No Hands")
             pass
         elif len(detection_result.hand_landmarks) == 1:
             print("One Hand", len(detection_result.hand_landmarks[0]), end="\n\n")
@@ -47,7 +47,7 @@ while True:
 
         print(detection_result)
         # debugging
-        print(type(detection_result))
+        # print(type(detection_result))
         iterations += 1
 
     annotated_image = draw_landmarks_on_image(mp_image.numpy_view(), detection_result)

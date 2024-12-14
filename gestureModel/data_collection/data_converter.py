@@ -64,16 +64,16 @@ def add_data(detection_result: HandLandmarkerResult, data, element_class: str) -
     # There are 21 elements for a single hand
 
     for i in range(21):
-        element_dict[f"left_vtx_{i}_x"] = None
-        element_dict[f"left_vtx_{i}_y"] = None 
-        element_dict[f"left_vtx_{i}_z"] = None
-        element_dict[f"left_vtx_{i}_visibility"] = None
-        element_dict[f"left_vtx_{i}_presence"] = None
-        element_dict[f"right_vtx_{i}_x"] = None
-        element_dict[f"right_vtx_{i}_y"] = None
-        element_dict[f"right_vtx_{i}_z"] = None
-        element_dict[f"right_vtx_{i}_visibility"] = None
-        element_dict[f"right_vtx_{i}_presence"] = None
+        element_dict[f"left_vtx_{i}_x"] = 100.0
+        element_dict[f"left_vtx_{i}_y"] = 100.0
+        element_dict[f"left_vtx_{i}_z"] = 100.0
+        element_dict[f"left_vtx_{i}_visibility"] = 0.0
+        element_dict[f"left_vtx_{i}_presence"] = 0.0
+        element_dict[f"right_vtx_{i}_x"] = 100.0
+        element_dict[f"right_vtx_{i}_y"] = 100.0
+        element_dict[f"right_vtx_{i}_z"] = 100.0
+        element_dict[f"right_vtx_{i}_visibility"] = 0.0
+        element_dict[f"right_vtx_{i}_presence"] = 100.0
 
     match (handinality):
         case HandTypes.L:

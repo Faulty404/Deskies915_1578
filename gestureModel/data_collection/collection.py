@@ -4,20 +4,6 @@ import sys
 
 # ---------------------------------------------------------------------------- #
 
-if len(sys.argv) < 2:
-    print("Too few command line arguments provided!")
-    print("Usage: python collection.py <path_to_photo_directory> [<display_photo>]")
-    print("<display_photo>{0, 1}= whether to display the annotated photo or not (default 0)")
-    exit(1)
-elif len(sys.argv) > 3:
-    print("Too many command line arguments provided!")
-    print("Usage: python collection.py <path_to_photo_directory> [<display_photo>]")
-    print("<display_photo>{0, 1}= whether to display the annotated photo or not (default 0)")
-    exit(1)
-
-
-# ---------------------------------------------------------------------------- #
-
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
@@ -73,6 +59,17 @@ def add_entry_and_display(filename: str, display: bool) -> None:
 # ---------------------------------------------------------------------------- #
 
 def main() -> None:
+    if len(sys.argv) < 2:
+        print("Too few command line arguments provided!")
+        print("Usage: python collection.py <path_to_photo_directory> [<display_photo>]")
+        print("<display_photo>{0, 1}= whether to display the annotated photo or not (default 0)")
+        exit(1)
+    elif len(sys.argv) > 3:
+        print("Too many command line arguments provided!")
+        print("Usage: python collection.py <path_to_photo_directory> [<display_photo>]")
+        print("<display_photo>{0, 1}= whether to display the annotated photo or not (default 0)")
+        exit(1)
+
     filepaths = get_photo_file_paths(sys.argv[1])
     if len(sys.argv[1]) == 2:
         for filepath in filepaths:

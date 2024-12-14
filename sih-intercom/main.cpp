@@ -7,9 +7,7 @@
 #include <QWidget>
 #include <QSplitter>
 #include <QColorDialog>
-#include <QTextEdit>
-#include <QSlider>
-#include <QLineEdit>
+#include <QSpacerItem>
 #include <QHBoxLayout>
 
 class VideoCallApp : public QMainWindow {
@@ -18,20 +16,28 @@ class VideoCallApp : public QMainWindow {
 public:
     VideoCallApp(QWidget *parent = nullptr) : QMainWindow(parent) {
         // Main widget and layout
-        QWidget *centralWidget = new QWidget(this);
+        centralWidget = new QWidget(this);
         mainLayout = new QVBoxLayout(centralWidget);
 
         // Title label
-        titleLabel = new QLabel("Video Call Application", this);
+        titleLabel = new QLabel("Signa Intercom", this);
         titleLabel->setAlignment(Qt::AlignCenter);
-        titleLabel->setStyleSheet("font-size: 18px; font-weight: bold;");
+        titleLabel->setStyleSheet("font-size: 20px; font-weight: bold;");
         mainLayout->addWidget(titleLabel);
 
-        // Question section
+        // Spacer to separate title from question
+        mainLayout->addSpacerItem(new QSpacerItem(0, 20));
+
+        // Question section inside rectangular box
+        questionContainer = new QWidget(this);
+        QVBoxLayout *questionLayout = new QVBoxLayout(questionContainer);
         questionLabel = new QLabel("Are you deaf?", this);
         questionLabel->setAlignment(Qt::AlignCenter);
         questionLabel->setStyleSheet("font-size: 16px;");
-        mainLayout->addWidget(questionLabel);
+        questionContainer->setStyleSheet(
+            "border: 2px solid black; border-radius: 5px; padding: 10px;"
+            );
+        questionLayout->addWidget(questionLabel);
 
         yesButton = new QPushButton("Yes", this);
         noButton = new QPushButton("No", this);
@@ -42,44 +48,66 @@ public:
         QHBoxLayout *buttonLayout = new QHBoxLayout;
         buttonLayout->addWidget(yesButton);
         buttonLayout->addWidget(noButton);
-        mainLayout->addLayout(buttonLayout);
+        questionLayout->addLayout(buttonLayout);
 
-        // Color change button
+        mainLayout->addWidget(questionContainer);
+
+        // Spacer to separate question section and footer
+        mainLayout->addSpacerItem(new QSpacerItem(0, 20));
+
+        // Color change button at the bottom
         colorButton = new QPushButton("Change Colors", this);
         connect(colorButton, &QPushButton::clicked, this, &VideoCallApp::openColorDialog);
         mainLayout->addWidget(colorButton);
 
-        // Caption size adjustment (slider)
-        captionSizeSlider = new QSlider(Qt::Horizontal, this);
-        captionSizeSlider->setRange(50, 200); // 50% to 200%
-        captionSizeSlider->setValue(100); // Default size is 100%
-        connect(captionSizeSlider, &QSlider::valueChanged, this, &VideoCallApp::adjustCaptionSize);
+        // Set up notifications button at the bottom left corner
+        notificationsButton = new QPushButton("🔔", this);
+        notificationsButton->setFixedSize(50, 50); // Set size for circular button
+        notificationsButton->setStyleSheet(
+            "border-radius: 25px; "
+            "background-color: #007BFF; "
+            "color: white; "
+            "font-size: 18px;"
+            );
+        bottomLayout = new QHBoxLayout();
+        bottomLayout->addWidget(notificationsButton, 0, Qt::AlignLeft);
+        bottomLayout->addStretch();
+        mainLayout->addLayout(bottomLayout);
 
-        captionSizeLabel = new QLabel("Caption Size: 100%", this);
-        QHBoxLayout *captionSizeLayout = new QHBoxLayout;
-        captionSizeLayout->addWidget(captionSizeLabel);
-        captionSizeLayout->addWidget(captionSizeSlider);
-        mainLayout->addLayout(captionSizeLayout);
-
-        // Video call section placeholder (initially hidden)
-        videoContainer = new QSplitter(Qt::Vertical, this);
-        videoContainer->setVisible(false);
-        mainLayout->addWidget(videoContainer);
+        connect(notificationsButton, &QPushButton::clicked, this, &VideoCallApp::showNotificationsMenu);
 
         setCentralWidget(centralWidget);
-        setWindowTitle("Video Call App");
-        resize(400, 300);
+        setWindowTitle("Signa Intercom");
+        resize(400, 500);
     }
 
 private slots:
+    void showNotificationsMenu() {
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("Notifications");
+        msgBox.setText("Choose an action:");
+
+        QPushButton *emergencyMeetingButton = msgBox.addButton("Emergency Meeting", QMessageBox::ActionRole);
+        QPushButton *routineReminderButton = msgBox.addButton("Routine Reminder", QMessageBox::ActionRole);
+        QPushButton *cancelButton = msgBox.addButton("Cancel", QMessageBox::RejectRole);
+
+        msgBox.exec();
+
+        if (msgBox.clickedButton() == emergencyMeetingButton) {
+            QMessageBox::information(this, "Emergency Meeting", "Emergency meeting has been scheduled.");
+        } else if (msgBox.clickedButton() == routineReminderButton) {
+            QMessageBox::information(this, "Routine Reminder", "Routine reminder has been set.");
+        } else if (msgBox.clickedButton() == cancelButton) {
+            QMessageBox::information(this, "Cancelled", "Action cancelled.");
+        }
+    }
+
     void handleYes() {
-        QMessageBox::information(this, "Interpreter Added", "An interpreter has been added to the call.");
-        setupVideoCallLayout(true);
+        setupVideoCallInterface(true);
     }
 
     void handleNo() {
-        QMessageBox::information(this, "Response Recorded", "No interpreter needed.");
-        setupVideoCallLayout(false);
+        setupVideoCallInterface(false);
     }
 
     void openColorDialog() {
@@ -92,151 +120,86 @@ private slots:
         }
     }
 
-    void adjustCaptionSize(int value) {
-        // Adjust the caption size based on the slider value (percentage)
-        int fontSize = value; // The slider value will be the percentage of the default font size
-        captionLabel->setStyleSheet(QString("font-size: %1px;").arg(fontSize));
-        captionSizeLabel->setText(QString("Caption Size: %1%").arg(value));
-    }
+    void setupVideoCallInterface(bool withInterpreter) {
+        // Hide the initial UI
+        questionContainer->setVisible(false);
+        titleLabel->setVisible(false);
+        notificationsButton->setVisible(false);
+        colorButton->setVisible(false);
 
-    void sendMessage() {
-        QString message = chatInputField->text();
-        if (!message.isEmpty()) {
-            // Display the message in the chat area
-            chatDisplay->append(QString("<b>You:</b> %1").arg(message));
-            chatInputField->clear(); // Clear the input field
-        }
-    }
+        // Set up the new main video call interface
+        QWidget *videoInterfaceContainer = new QWidget(this);
+        QVBoxLayout *videoLayout = new QVBoxLayout(videoInterfaceContainer);
 
-    void toggleCaptions() {
-        if (captionsEnabled) {
-            // Switch to sign language captions
-            captionLabel->setText("Sign Language Captions: [Sign language animation here]");
-            captionsButton->setText("Enable Speech-to-Text Captions");
+        if (withInterpreter) {
+            // Interpreter + Two participants
+            QSplitter *mainSplitter = new QSplitter(Qt::Horizontal, this);
+
+            QLabel *interpreterVideo = new QLabel("[Interpreter Video]");
+            interpreterVideo->setStyleSheet("border: 2px solid black; background: lightblue;");
+            interpreterVideo->setAlignment(Qt::AlignCenter);
+
+            QSplitter *participantsSplitter = new QSplitter(Qt::Vertical, this);
+            QLabel *personAVideo = new QLabel("[Person A Video]");
+            QLabel *personBVideo = new QLabel("[Person B Video]");
+
+            personAVideo->setStyleSheet("border: 2px solid black; background: lightgray;");
+            personBVideo->setStyleSheet("border: 2px solid black; background: lightgray;");
+
+            participantsSplitter->addWidget(personAVideo);
+            participantsSplitter->addWidget(personBVideo);
+
+            mainSplitter->addWidget(interpreterVideo);
+            mainSplitter->addWidget(participantsSplitter);
+
+            mainSplitter->setStretchFactor(0, 3);
+            mainSplitter->setStretchFactor(1, 1);
+
+            videoLayout->addWidget(mainSplitter);
         } else {
-            // Switch to speech-to-text captions
-            captionLabel->setText("Speech-to-Text Captions: [Live speech-to-text here]");
-            captionsButton->setText("Enable Sign Language Captions");
+            // Two participants only
+            QSplitter *participantsSplitter = new QSplitter(Qt::Horizontal, this);
+            QLabel *personAVideo = new QLabel("[Person A Video]");
+            QLabel *personBVideo = new QLabel("[Person B Video]");
+
+            personAVideo->setStyleSheet("border: 2px solid black; background: lightgray;");
+            personBVideo->setStyleSheet("border: 2px solid black; background: lightgray;");
+
+            participantsSplitter->addWidget(personAVideo);
+            participantsSplitter->addWidget(personBVideo);
+
+            participantsSplitter->setStretchFactor(0, 1);
+            participantsSplitter->setStretchFactor(1, 1);
+
+            videoLayout->addWidget(participantsSplitter);
         }
 
-        captionsEnabled = !captionsEnabled;
+        // Add End Call Button
+        QPushButton *endCallButton = new QPushButton("End Call", this);
+        connect(endCallButton, &QPushButton::clicked, this, &VideoCallApp::resetToInitialState);
+        videoLayout->addWidget(endCallButton);
+
+        setCentralWidget(videoInterfaceContainer);
     }
 
-    void enableCaptionsAfterCall() {
-        // Enable the captions button after the video call begins
-        captionsButton = new QPushButton("Enable Captions", this);
-        connect(captionsButton, &QPushButton::clicked, this, &VideoCallApp::toggleCaptions);
-        mainLayout->addWidget(captionsButton);
+    void resetToInitialState() {
+        setCentralWidget(centralWidget);
+
+        questionContainer->setVisible(true);
+        titleLabel->setVisible(true);
+        notificationsButton->setVisible(true);
+        colorButton->setVisible(true);
     }
 
 private:
-    QLabel *titleLabel;
+    QPushButton *notificationsButton;
     QLabel *questionLabel;
-    QPushButton *yesButton;
-    QPushButton *noButton;
-    QPushButton *colorButton;
-    QPushButton *captionsButton;
-    QSplitter *videoContainer;
+    QPushButton *yesButton, *noButton, *colorButton;
+    QWidget *questionContainer;
     QVBoxLayout *mainLayout;
-    QLabel *captionLabel;
-    QLabel *captionSizeLabel;
-    QSlider *captionSizeSlider;
-
-    QLineEdit *chatInputField;
-    QTextEdit *chatDisplay;
-    QPushButton *sendButton;
-
-    bool captionsEnabled = false;
-
-    void setupVideoCallLayout(bool withInterpreter) {
-        // Hide the question and buttons
-        titleLabel->setVisible(false);
-        questionLabel->setVisible(false);
-        yesButton->setVisible(false);
-        noButton->setVisible(false);
-        colorButton->setVisible(false); // Hide the color change button during the call
-
-        // Show the video container
-        videoContainer->setVisible(true);
-
-        // Clear previous widgets if any
-        for (auto widget : videoContainer->findChildren<QWidget *>()) {
-            delete widget;
-        }
-
-        // Create video blocks
-        if (withInterpreter) {
-            // Display interpreter along with two participants
-            QLabel *interpreterVideo = new QLabel("[Interpreter Video]");
-            interpreterVideo->setStyleSheet("border: 1px solid black; background: lightgray;");
-            interpreterVideo->setAlignment(Qt::AlignCenter);
-
-            QSplitter *participantsSplitter = new QSplitter(Qt::Horizontal, this);
-            QLabel *personA = new QLabel("[Person A Video]");
-            personA->setStyleSheet("border: 1px solid black; background: lightgray;");
-            personA->setAlignment(Qt::AlignCenter);
-
-            QLabel *personB = new QLabel("[Person B Video]");
-            personB->setStyleSheet("border: 1px solid black; background: lightgray;");
-            personB->setAlignment(Qt::AlignCenter);
-
-            participantsSplitter->addWidget(personA);
-            participantsSplitter->addWidget(personB);
-
-            videoContainer->addWidget(interpreterVideo);
-            videoContainer->addWidget(participantsSplitter);
-
-            // Adjustable proportions
-            videoContainer->setStretchFactor(0, 3); // Interpreter video gets more space
-            videoContainer->setStretchFactor(1, 1); // Participants section gets less space
-            participantsSplitter->setStretchFactor(0, 1); // Calling person's video smaller
-            participantsSplitter->setStretchFactor(1, 2); // Other person's video larger
-        } else {
-            // Display only the two participants without interpreter
-            QSplitter *participantsSplitter = new QSplitter(Qt::Horizontal, this);
-            QLabel *personA = new QLabel("[Person A Video]");
-            personA->setStyleSheet("border: 1px solid black; background: lightgray;");
-            personA->setAlignment(Qt::AlignCenter);
-
-            QLabel *personB = new QLabel("[Person B Video]");
-            personB->setStyleSheet("border: 1px solid black; background: lightgray;");
-            personB->setAlignment(Qt::AlignCenter);
-
-            participantsSplitter->addWidget(personA);
-            participantsSplitter->addWidget(personB);
-
-            videoContainer->addWidget(participantsSplitter);
-
-            // Adjustable proportions for the two participants
-            participantsSplitter->setStretchFactor(0, 1); // Calling person's video smaller
-            participantsSplitter->setStretchFactor(1, 2); // Other person's video larger
-        }
-
-        // Caption display (Initially no captions)
-        captionLabel = new QLabel("Captions will appear here", this);
-        captionLabel->setAlignment(Qt::AlignCenter);
-        captionLabel->setStyleSheet("font-size: 14px; font-weight: bold; color: black;");
-        videoContainer->addWidget(captionLabel);
-
-        // Create chat interface
-        chatDisplay = new QTextEdit(this);
-        chatDisplay->setReadOnly(true);  // Make the chat display read-only
-        chatDisplay->setStyleSheet("border: 1px solid black; background: lightgray;");
-        videoContainer->addWidget(chatDisplay);
-
-        // Chat input field
-        chatInputField = new QLineEdit(this);
-        chatInputField->setPlaceholderText("Type a message...");
-        videoContainer->addWidget(chatInputField);
-
-        // Send button for chat
-        sendButton = new QPushButton("Send", this);
-        connect(sendButton, &QPushButton::clicked, this, &VideoCallApp::sendMessage);
-        videoContainer->addWidget(sendButton);
-
-        // Enable captions after the video call starts
-        enableCaptionsAfterCall();
-    }
+    QHBoxLayout *bottomLayout;
+    QWidget *centralWidget;
+    QLabel *titleLabel;
 };
 
 int main(int argc, char *argv[]) {
